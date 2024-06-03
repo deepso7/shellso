@@ -41,10 +41,17 @@ fn main() {
                     .map(|path| format!("{}/{}", path, tokens[1]))
                     .find(|path| std::fs::metadata(path).is_ok());
 
-                if let Some(path) = found_path {
-                    println!("{} is {}", tokens[1], path)
-                } else {
-                    println!("{} not found", tokens[1].trim())
+                match tokens[1] {
+                    "echo" => println!("{} is a shell builtin", tokens[1].trim()),
+                    "exit" => println!("{} is a shell builtin", tokens[1].trim()),
+                    "type" => println!("{} is a shell builtin", tokens[1].trim()),
+                    _ => {
+                        if let Some(path) = found_path {
+                            println!("{} is {}", tokens[1], path)
+                        } else {
+                            println!("{} not found", tokens[1].trim())
+                        }
+                    }
                 }
             }
 
