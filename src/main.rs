@@ -1,10 +1,22 @@
 use std::env;
-#[allow(unused_imports)]
 use std::io::{self, Write};
-use std::process::exit;
+use std::path::PathBuf;
+use std::process::{exit, Command};
 
 fn tokenize(input: &str) -> Vec<&str> {
     input.split(' ').collect()
+}
+
+fn find_exe(name: &str) -> Option<PathBuf> {
+    if let Ok(paths) = env::var("PATH") {
+        for path in env::split_paths(&paths) {
+            let exe_path = path.join(name);
+            if exe_path.is_file() {
+                return Some(exe_path);
+            }
+        }
+    }
+    None
 }
 
 fn main() {
@@ -35,30 +47,29 @@ fn main() {
 
             "echo" => println!("{}", tokens[1..].join(" ")),
 
-            "type" => {
-                let path_env: Result<String, env::VarError> = env::var("PATH");
-
-                let found_path = path_env
-                    .unwrap()
-                    .split(":")
-                    .map(|path| format!("{}/{}", path, tokens[1]))
-                    .find(|path| std::fs::metadata(path).is_ok());
-
-                match tokens[1] {
-                    "echo" => println!("{} is a shell builtin", tokens[1].trim()),
-                    "exit" => println!("{} is a shell builtin", tokens[1].trim()),
-                    "type" => println!("{} is a shell builtin", tokens[1].trim()),
-                    _ => {
-                        if let Some(path) = found_path {
-                            println!("{} is {}", tokens[1], path)
-                        } else {
-                            println!("{} not found", tokens[1].trim())
-                        }
+            "type" => match tokens[1] {
+                "echo" => println!("{} is a shell builtin", tokens[1].trim()),
+                "exit" => println!("{} is a shell builtin", tokens[1].trim()),
+                "type" => println!("{} is a shell builtin", tokens[1].trim()),
+                _ => {
+                    if let Some(path) = find_exe(tokens[1]) {
+                        println!("{} is {}", tokens[1], path.to_str().unwrap())
+                    } else {
+                        println!("{} not found", tokens[1].trim())
                     }
                 }
-            }
+            },
 
-            _ => println!("{}: command not found", input.trim()),
+            _ => {
+                if let Some(path) = find_exe(tokens[0]) {
+                    Command::new(path)
+                        .args(&tokens[1..])
+                        .status()
+                        .expect("failed to execute process");
+                } else {
+                    println!("{}: command not found", input.trim())
+                }
+            }
         }
 
         input.clear();
