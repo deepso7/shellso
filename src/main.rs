@@ -21,7 +21,13 @@ fn main() {
         let token = tokenize(input.trim());
 
         match token[..] {
-            ["exit", code] => exit(code.parse::<i32>().unwrap()),
+            ["exit", code] => exit(match code.parse::<i32>() {
+                Ok(num) => num,
+                Err(_e) => {
+                    println!("enter valid integer");
+                    1
+                }
+            }),
 
             ["echo", ..] => println!("{}", token[1..].join(" ")),
 
