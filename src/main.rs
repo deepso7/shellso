@@ -18,10 +18,10 @@ fn main() {
     io::stdout().flush().unwrap();
 
     while stdin.read_line(&mut input).is_ok() {
-        let token = tokenize(input.trim());
+        let tokens = tokenize(input.trim());
 
-        match token[..] {
-            ["exit", code] => exit(match code.parse::<i32>() {
+        match tokens[0] {
+            "exit" => exit(match tokens[1].parse::<i32>() {
                 Ok(num) => num,
                 Err(_e) => {
                     println!("enter valid integer");
@@ -29,7 +29,14 @@ fn main() {
                 }
             }),
 
-            ["echo", ..] => println!("{}", token[1..].join(" ")),
+            "echo" => println!("{}", tokens[1..].join(" ")),
+
+            "type" => match tokens[1] {
+                "echo" => println!("{} is a shell builtin", tokens[1].trim()),
+                "exit" => println!("{} is a shell builtin", tokens[1].trim()),
+                "type" => println!("{} is a shell builtin", tokens[1].trim()),
+                _ => println!("{} not found", tokens[1].trim()),
+            },
 
             _ => println!("{}: command not found", input.trim()),
         }
