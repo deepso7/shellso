@@ -35,13 +35,16 @@ fn main() {
 
         match tokens[0] {
             "exit" => {
-                // TODO: handle the case where tokens[1] is undefined
-                let code = tokens[1].parse::<i32>();
+                let c = tokens.get(1);
 
-                if let Ok(num) = code {
-                    exit(num)
+                if let Some(code) = c {
+                    if let Ok(num) = code.parse::<i32>() {
+                        exit(num)
+                    } else {
+                        println!("enter valid integer")
+                    }
                 } else {
-                    println!("enter valid integer")
+                    exit(1)
                 }
             }
 
