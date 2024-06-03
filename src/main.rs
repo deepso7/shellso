@@ -22,13 +22,16 @@ fn main() {
         let tokens = tokenize(input.trim());
 
         match tokens[0] {
-            "exit" => exit(match tokens[1].parse::<i32>() {
-                Ok(num) => num,
-                Err(_e) => {
-                    println!("enter valid integer");
-                    1
+            "exit" => {
+                // TODO: handle the case where tokens[1] is undefined
+                let code = tokens[1].parse::<i32>();
+
+                if let Ok(num) = code {
+                    exit(num)
+                } else {
+                    println!("enter valid integer")
                 }
-            }),
+            }
 
             "echo" => println!("{}", tokens[1..].join(" ")),
 
