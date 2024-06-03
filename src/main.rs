@@ -2,6 +2,10 @@
 use std::io::{self, Write};
 use std::process::exit;
 
+fn tokenize(input: &str) -> Vec<&str> {
+    input.split(' ').collect()
+}
+
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear here!");
@@ -14,10 +18,14 @@ fn main() {
     io::stdout().flush().unwrap();
 
     while stdin.read_line(&mut input).is_ok() {
-        match input.trim().to_lowercase().as_str() {
-            "exit 0" => exit(0),
+        let token = tokenize(input.trim());
 
-            _ => println!("{}: command not found", input.strip_suffix("\n").unwrap()),
+        match token[..] {
+            ["exit", code] => exit(code.parse::<i32>().unwrap()),
+
+            ["echo", ..] => println!("{}", token[1..].join(" ")),
+
+            _ => println!("{}: command not found", input.trim()),
         }
 
         input.clear();
